@@ -62,18 +62,33 @@
 
   <script>
     const form = document.getElementById('songForm');
-    form.addEventListener('submit', e => {
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const data = new FormData(form);
-      fetch('https://script.google.com/macros/s/AKfycbx8qfnGyGuPgiLXPgh_Skje0b9-LLNBqydS_tQqL7rIIyX2RfZ-eGyc-sLjLYWMeVzrzg/exec', {
-        method: 'POST',
-        body: data
-      }).then(() => {
-        document.getElementById('message').innerText = '✅ تم إرسال اقتراحك بنجاح!';
-        form.reset();
-      }).catch(() => {
-        document.getElementById('message').innerText = '❌ حدث خطأ. حاول مرة أخرى.';
-      });
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbx8qfnGyGuPgiLXPgh_Skje0b9-LLNBqydS_tQqL7rIIyX2RfZ-eGyc-sLjLYWMeVzrzg/exec', {
+          method: 'POST',
+          body: data
+        });
+
+        const text = await response.text();
+
+        if (response.ok && text.includes("تم الاستلام")) {
+          message.innerText = '✅ تم إرسال اقتراحك بنجاح!';
+          message.style.color = 'lightgreen';
+          form.reset();
+        } else {
+          message.innerText = '❌ حدث خطأ في الاستجابة من الخادم.';
+          message.style.color = 'red';
+        }
+      } catch (error) {
+        console.error(error);
+        message.innerText = '❌ حدث خطأ. تأكد من اتصال الإنترنت أو من صلاحيات النموذج.';
+        message.style.color = 'red';
+      }
     });
   </script>
 
